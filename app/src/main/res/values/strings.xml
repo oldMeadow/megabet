@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">MegaBet</string>
+    <string name="nachrichtenHinweis">Nachricht</string>
+    <string name="buttonsendtext">Senden</string>
+    <string name="new_chat">Neuer Chat</string>
+</resources>
