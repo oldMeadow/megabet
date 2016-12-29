@@ -40,19 +40,18 @@ public class ChatActivity extends AppCompatActivity {
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        getKey();
-
         /* Um ausschließlich die ChatActivity zu testen:
          ladeBeispieldaten();
          */
+
+        getKey();
 
         getReceiverName();
         setTitle("Chat mit " + receiverName);
 
         text = (EditText) findViewById(R.id.messageBox);
         setTextChangedListener();
-        text.setFilters(new InputFilter[]{ignoreFirstSpace(),
-                new InputFilter.LengthFilter(2000)});
+        text.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2000)});
 
         sendButton = (Button) findViewById(R.id.sendButton);
         sendButton.setEnabled(false);
@@ -69,66 +68,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-
     //Name des Empfängers aus DB holen
     private void getReceiverName(){
 
         User user = ChatApp.db.getUser(receiverMail);
         receiverName = user.getName();
-    }
-
-
-    //einzelne Nachrichten vom ChatAdapter darstellen lassen
-    private void generateBubbles(){
-        this.generateMessageList(ChatApp.db);
-
-
-
-        chatAdapter = new ChatAdapter(this, messageList);
-        ListView listView = (ListView) findViewById(R.id.bubblesListView);
-
-        //Automatisch nach unten scrollen
-        listView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        listView.setStackFromBottom(true);
-
-        listView.setAdapter(chatAdapter);
-
-    }
-
-
-    //Betreffende Nachrichten aus DB laden
-    private void generateMessageList(DatabaseHandler db){
-        messageList = new ArrayList<>(db.getMessageList(identification, receiverMail).values());
-        Collections.sort(messageList, compTimeStamp);
-    }
-
-    //Identification für ChatAdapter bereitstellen
-    public String getIdentification(){
-        return identification;
-    }
-
-    // Übergibt beim klicken des Buttons die eingegebene Nachricht an die Datenbank
-    private void setButtonClickListener() {
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-
-                ChatApp.db.addMessage(new Message(identification, receiverMail, text.getText().toString().trim(), ConversionHelper.now(), false));
-
-                //Textfeld leeren
-                text.setText("");
-
-                //Ansicht aktualisieren
-                chatAdapter.notifyDataSetChanged();
-
-                sendButton.setEnabled(false);
-                generateBubbles();
-
-            }
-        });
-
     }
 
     //Überprüft, ob Textfeld gefüllt ist und aktiviert Sendebutton
@@ -141,9 +85,11 @@ public class ChatActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!"".equals(text.getText().toString())) {
                     sendButton.setEnabled(true);
-                }
-                else {
+                } else {
                     sendButton.setEnabled(false);
+                }
+                if (s.length() > 0 && s.subSequence(0, 1).toString().equalsIgnoreCase(" ")) {
+                    text.setText("");
                 }
             }
             @Override
@@ -153,22 +99,54 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    //Lässt Leerzeichen nicht als erstes Zeichen zu
-    public InputFilter ignoreFirstSpace() {
-        return new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
 
-                for (int i = start; i < end; i++) {
-                    if (Character.isWhitespace(source.charAt(i))) {
-                        if (dstart == 0)
-                            return "";
-                    }
-                }
-                return null;
+    // Übergibt beim klicken des Buttons die eingegebene Nachricht an die Datenbank
+    private void setButtonClickListener() {
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ChatApp.db.addMessage(new Message(identification, receiverMail,
+                        text.getText().toString().trim(), ConversionHelper.now(), false));
+
+                //Textfeld leeren
+                text.setText("");
+
+                sendButton.setEnabled(false);
+                generateBubbles();
             }
-        };
+        });
     }
+
+    //einzelne Nachrichten vom ChatAdapter darstellen lassen
+    private void generateBubbles(){
+        this.generateMessageList(ChatApp.db);
+
+        chatAdapter = new ChatAdapter(this, messageList);
+        ListView listView = (ListView) findViewById(R.id.bubblesListView);
+
+        //Automatisch nach unten scrollen
+        listView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        listView.setStackFromBottom(true);
+
+        listView.setAdapter(chatAdapter);
+
+    }
+
+    //Betreffende Nachrichten aus DB laden
+    private void generateMessageList(DatabaseHandler db){
+        messageList = new ArrayList<>
+                (db.getMessageList(identification, receiverMail).values());
+        Collections.sort(messageList, compTimeStamp);
+    }
+
+
+    //Identification für ChatAdapter bereitstellen
+    public String getIdentification(){
+        return identification;
+    }
+
+
 
 
     //Erstelle Beispieldaten, um diese Activity zu testen

@@ -28,8 +28,6 @@ public class ChatAdapter extends ArrayAdapter<Message>{
         LinearLayout layout;
         LinearLayout parent_layout;
         ImageView isRead;
-
-
     }
 
 
@@ -52,12 +50,16 @@ public class ChatAdapter extends ArrayAdapter<Message>{
 
         // Falls möglich Views recyclen, ansonsten erweitern
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.message_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate
+                    (R.layout.message_item, parent, false);
             viewHolder = new ViewHolder();
 
-            viewHolder.messageText = (TextView) convertView.findViewById(R.id.message_text);
-            viewHolder.layout = (LinearLayout) convertView.findViewById(R.id.bubble_layout);
-            viewHolder.parent_layout = (LinearLayout) convertView.findViewById(R.id.bubble_layout_parent);
+            viewHolder.messageText = (TextView)
+                    convertView.findViewById(R.id.message_text);
+            viewHolder.layout = (LinearLayout)
+                    convertView.findViewById(R.id.bubble_layout);
+            viewHolder.parent_layout = (LinearLayout)
+                    convertView.findViewById(R.id.bubble_layout_parent);
 
             convertView.setTag(viewHolder);
 
@@ -76,8 +78,7 @@ public class ChatAdapter extends ArrayAdapter<Message>{
 
 
             //Wenn Nachricht gelesen wurde, isRead-Symbol anpassen
-            if (message.getIs_read() == true) {
-
+            if (message.getIs_read()) {
                 viewHolder.isRead.setImageResource(R.mipmap.isread);
             } else {
                 viewHolder.isRead.setImageResource(R.mipmap.notread);
@@ -89,7 +90,7 @@ public class ChatAdapter extends ArrayAdapter<Message>{
             viewHolder.isRead.setVisibility(convertView.GONE);
 
             //Empfangene Nachrichten als gelesen markieren
-            if (message.getIs_read() == false) {
+            if (!message.getIs_read()) {
                 message.setIs_read(true);
                 ChatApp.db.updateMessage(message);
             }
